@@ -19,7 +19,7 @@ class Program
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
                     "Server=(localdb)\\mssqllocaldb;Database=EFCoreCustomFields;Trusted_Connection=True;MultipleActiveResultSets=true")
-                .UseCustomFields());
+                );
 
         var provider = services.BuildServiceProvider();
 

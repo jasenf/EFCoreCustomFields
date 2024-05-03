@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConsoleSample.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240503125137_Initial")]
+    [Migration("20240503230205_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -41,11 +41,11 @@ namespace ConsoleSample.Migrations
 
             modelBuilder.Entity("EFCoreCustomFields.CustomField", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("CustomFieldType")
                         .HasColumnType("int");

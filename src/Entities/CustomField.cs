@@ -2,7 +2,7 @@
 
 public class CustomField
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public string Name { get; set; }
     public CustomFieldType CustomFieldType { get; set; }
     public int DisplayOrder { get; set; }
