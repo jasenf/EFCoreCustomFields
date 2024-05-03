@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace ConsoleTest.Migrations
+namespace ConsoleSample.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -20,6 +20,21 @@ namespace ConsoleTest.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Customer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customer");
+                });
 
             modelBuilder.Entity("EFCoreCustomFields.CustomField", b =>
                 {
@@ -54,19 +69,19 @@ namespace ConsoleTest.Migrations
                     b.ToTable("CustomFields");
                 });
 
-            modelBuilder.Entity("EFCoreCustomFields.CustomFieldValue<Product>", b =>
+            modelBuilder.Entity("EFCoreCustomFields.CustomFieldValue<Customer>", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("CustomFieldEntityId")
-                        .HasColumnType("int");
+                    b.Property<long>("CustomFieldId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("CustomFieldId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("ValueBoolean")
                         .HasColumnType("bit");
@@ -86,18 +101,55 @@ namespace ConsoleTest.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomFieldEntityId");
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("CustomerCustomFields");
+                });
+
+            modelBuilder.Entity("EFCoreCustomFields.CustomFieldValue<Product>", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CustomFieldId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("ValueBoolean")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ValueDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("ValueDecimal")
+                        .HasColumnType("float");
+
+                    b.Property<long?>("ValueNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ValueString")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("ProductCustomFields");
                 });
 
             modelBuilder.Entity("Product", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -108,13 +160,23 @@ namespace ConsoleTest.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("EFCoreCustomFields.CustomFieldValue<Customer>", b =>
+                {
+                    b.HasOne("Customer", null)
+                        .WithMany("CustomFields")
+                        .HasForeignKey("CustomerId");
+                });
+
             modelBuilder.Entity("EFCoreCustomFields.CustomFieldValue<Product>", b =>
                 {
                     b.HasOne("Product", null)
                         .WithMany("CustomFields")
-                        .HasForeignKey("CustomFieldEntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductId");
+                });
+
+            modelBuilder.Entity("Customer", b =>
+                {
+                    b.Navigation("CustomFields");
                 });
 
             modelBuilder.Entity("Product", b =>
