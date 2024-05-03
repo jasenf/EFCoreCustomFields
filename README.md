@@ -2,9 +2,6 @@
 ## Introduction
 Many systems like CRM apps need flexible custom fields that users can tweak. Traditional methods like JSON columns aren't great for performance or type safety.  This library allows you to adopt the Entity Attribute Value (EAV) model allowing you to place custom fields in a child table for the entities. Instead of one huge table for custom fields, this library allows each entity have its own, ensuring better performance and scalability.
 
-## Constraint
-The only constraint is the uniformity in the type of keys used. Applications utilizing various key types will need a separate class for each key type.
-
 ## Features
 Dynamic custom fields per entity
 Improved performance and type safety
