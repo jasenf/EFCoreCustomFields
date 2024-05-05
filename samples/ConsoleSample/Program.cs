@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Security.Principal;
@@ -18,7 +18,11 @@ class Program
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
-                    "Server=(localdb)\\mssqllocaldb;Database=EFCoreCustomFields;Trusted_Connection=True;MultipleActiveResultSets=true")
+                    "Server=(localdb)\\mssqllocaldb;Database=EFCoreCustomFields;Trusted_Connection=True;MultipleActiveResultSets=true",
+                    options =>
+                    {
+                        options.EnableRetryOnFailure();
+                    })
                 );
 
         var provider = services.BuildServiceProvider();
@@ -26,6 +30,9 @@ class Program
         using (var scope = provider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            // Create the database during startup.
+            context.Database.Migrate();
 
             // create the first custom field if it doesnt exist
             if (!context.CustomFields.Any())
@@ -105,11 +112,22 @@ class Program
             Console.WriteLine("Products:");
             Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions {WriteIndented = true}));
 
-            Console.WriteLine("Customers:");
+            Console.WriteLine("\nCustomers:");
             Console.WriteLine(JsonSerializer.Serialize(customers, new JsonSerializerOptions {WriteIndented = true}));
 
 
-            Console.WriteLine("Done");
+            Console.WriteLine("\nDone");
+
+            Console.WriteLine("\nYou can view the EFCoreCustomFields database in SQL Server Object Explorer or SSMS to see how the custom fields are represented there as well.");
+
+            Console.WriteLine("\nNOTE: When the application stops, the sample database will be deleted.  It is created when the sample application starts and dropped when the sample application stops to clean up resources.");
+
+            Console.WriteLine("\nPress any key to close the application.");
+
+            Console.ReadKey();
+
+            // Delete the database at the end of the test run.
+            context.Database.EnsureDeleted();
         }
     }
 }
