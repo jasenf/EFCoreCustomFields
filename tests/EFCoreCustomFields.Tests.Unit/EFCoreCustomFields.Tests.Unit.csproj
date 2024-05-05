@@ -15,4 +15,12 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EFCoreCustomFields.csproj" />
+  </ItemGroup>
+
 </Project>

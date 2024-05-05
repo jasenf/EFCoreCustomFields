@@ -27,4 +27,14 @@
     </NoWarn>
   </PropertyGroup>
 
+  <!-- Packaging -->
+  <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('src')) == 'false'">
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Code Coverage -->
+  <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('src')) == 'false'">
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage" />
+  </ItemGroup>
+
 </Project>

@@ -9,7 +9,7 @@ public class CustomField
     public CustomFieldType CustomFieldType { get; set; }
 
     public int DisplayOrder { get; set; }
-
+ 
     public bool IsRequired { get; set; }
 
     public string? DefaultValue { get; set; }
