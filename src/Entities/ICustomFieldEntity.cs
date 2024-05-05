@@ -1,10 +1,3 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+namespace EFCoreCustomFields;
 
-namespace EFCoreCustomFields
-{
-    public interface ICustomFieldEntity
-    {
-        
-    }
-
-}
+public interface ICustomFieldEntity { }
