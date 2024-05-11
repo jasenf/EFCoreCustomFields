@@ -1,0 +1,7 @@
+<Project>
+  <!-- Import global Directory.Build.props properties -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!-- Any properties that are only specific to projects within this subfolder -->
+
+</Project>
