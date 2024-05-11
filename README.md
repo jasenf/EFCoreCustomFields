@@ -14,8 +14,6 @@
 
 # EFCoreCustomFields
 
-
-
 <!-- TABLE OF CONTENTS -->
 
 <details>
@@ -99,15 +97,150 @@ Here's the CustomFields table data:
 
 ![CustomFields Table](./assets/images/customfields-table.png "CustomFields table")
 
-As you can see, the Products table schema is unchanged.  We are not modifying the existing table.  That said, we do need to modify the Product entity
+As you can see, the Products table schema is unchanged.  We are not modifying the existing table.  Instead, we have a new ProductCustomFields table and a new CustomFields table.  
 
-Each of the entities to which you would like to add custom fields will have a foreign key reference column to the Cus
+The ProductCustomFields table contains a column for each of the supported types (ValueString, ValueNumber, etc.), one of which will not be null.  It also includes a foreign key reference to the CustomField table's Id column and the Product table's Id column.
+
+The CustomFields table defines the individual custom fields and associates them with a type of entity via the ForEntity column, which contains the name of the entity class with custom fields.
+
+If you're not using EF Core Migrations, here's a SQL Script that would set up the sample application database you can use as a reference when setting up your own database:
+
+```sql
+BEGIN TRANSACTION;
+GO
+
+    CREATE TABLE [Customer] (
+        [Id] uniqueidentifier NOT NULL,
+        [Name] nvarchar(max) NOT NULL,
+        CONSTRAINT [PK_Customer] PRIMARY KEY ([Id])
+    );
+
+    CREATE TABLE [CustomFields] (
+        [Id] bigint NOT NULL IDENTITY,
+        [Name] nvarchar(max) NOT NULL,
+        [CustomFieldType] int NOT NULL,
+        [DisplayOrder] int NOT NULL,
+        [IsRequired] bit NOT NULL,
+        [DefaultValue] nvarchar(max) NULL,
+        [ForEntity] nvarchar(max) NOT NULL,
+        CONSTRAINT [PK_CustomFields] PRIMARY KEY ([Id])
+    );
+
+    CREATE TABLE [Products] (
+        [Id] bigint NOT NULL IDENTITY,
+        [Name] nvarchar(max) NOT NULL,
+        CONSTRAINT [PK_Products] PRIMARY KEY ([Id])
+    );
+
+    CREATE TABLE [CustomerCustomFields] (
+        [Id] bigint NOT NULL IDENTITY,
+        [CustomFieldId] bigint NOT NULL,
+        [ValueString] nvarchar(2048) NULL,
+        [ValueNumber] bigint NULL,
+        [ValueDecimal] float NULL,
+        [ValueBoolean] bit NULL,
+        [ValueDateTime] datetime2 NULL,
+        [CustomerId] uniqueidentifier NULL,
+        CONSTRAINT [PK_CustomerCustomFields] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_CustomerCustomFields_Customer_CustomerId] FOREIGN KEY ([CustomerId]) REFERENCES [Customer] ([Id])
+    );
+
+    CREATE TABLE [ProductCustomFields] (
+        [Id] bigint NOT NULL IDENTITY,
+        [CustomFieldId] bigint NOT NULL,
+        [ValueString] nvarchar(2048) NULL,
+        [ValueNumber] bigint NULL,
+        [ValueDecimal] float NULL,
+        [ValueBoolean] bit NULL,
+        [ValueDateTime] datetime2 NULL,
+        [ProductId] bigint NULL,
+        CONSTRAINT [PK_ProductCustomFields] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_ProductCustomFields_Products_ProductId] FOREIGN KEY ([ProductId]) REFERENCES [Products] ([Id])
+    );
+
+    CREATE INDEX [IX_CustomerCustomFields_CustomerId] ON [CustomerCustomFields] ([CustomerId]);
+
+    CREATE INDEX [IX_ProductCustomFields_ProductId] ON [ProductCustomFields] ([ProductId]);
+
+COMMIT;
+GO
+```
+
+### Entity Framework
+
+Though we are not modifying the existing database tables themselves, we do need to update the entities to which we would like to apply custom fields.  The entity will need to implement the ICustomFieldEntity&lt;T&gt; interface.  
+
+Let's look at Product again as an example.  Here is the EF Core representation of a Product entity:
+
+Before:
+
+```csharp
+public class Product
+{
+    public long Id { get; set; }
+    
+    public string Name { get; set; } = "";
+}
+```
+
+After:
+
+```csharp
+public class Product : ICustomFieldEntity<Product>
+{
+    public long Id { get; set; }
+    
+    public string Name { get; set; } = "";
+    
+    public static string EntityName => nameof(Product);
+    
+    public ICollection<CustomFieldValue<Product>> CustomFields { get; set; } 
+        = new List<CustomFieldValue<Product>>();
+}
+```
+
+EntityName provides a consistent way to populate the ForEntity column without relying on hardcoded strings.
+
+CustomFields establishes a 1:many relationship that says 1 product can have many custom fields.
 
 To work with this library, the EF Core entities to which you would like to add custom fields will need to implement the ICustomFieldEntity interface.
 
+You will also need to create DbSet properties and define relationships on the DbContext, as follows in our example:
 
+```csharp
+public class AppDbContext : DbContext
+{
+    public DbSet<CustomField> CustomFields { get; set; }
 
-You will also need a custom fields table.
+    public DbSet<Product> Products { get; set; }
+
+    public DbSet<CustomFieldValue<Product>> ProductCustomFields { get; set; }
+
+    public DbSet<Customer> Customer { get; set; }
+
+    public DbSet<CustomFieldValue<Customer>> CustomerCustomFields { get; set; }
+
+    public AppDbContext(DbContextOptions<AppDbContext> options) 
+        : base(options) { }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Product>()
+            .HasMany(p => p.CustomFields)
+            .WithOne()
+            .HasForeignKey("ProductId");
+
+        modelBuilder.Entity<Customer>()
+            .HasMany(p => p.CustomFields)
+            .WithOne()
+            .HasForeignKey("CustomerId");
+
+        base.OnModelCreating(modelBuilder);
+    }
+}
+```
+
+With all of that in place, you are now ready to support custom fields.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -126,4 +259,3 @@ Feel free to fork the repo, push your changes, and open a pull request. We appre
 This project is available under the MIT License. See the LICENSE file for more details.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-<!-- MARKDOWN LINKS AND IMAGES -->

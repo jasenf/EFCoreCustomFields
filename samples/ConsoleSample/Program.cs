@@ -129,7 +129,7 @@ class Program
     }
 }
 
-public class Product : ICustomFieldEntity
+public class Product : ICustomFieldEntity<Product>
 {
     public long Id { get; set; }
     public string Name { get; set; } = "";
@@ -137,7 +137,7 @@ public class Product : ICustomFieldEntity
     public ICollection<CustomFieldValue<Product>> CustomFields { get; set; } = new List<CustomFieldValue<Product>>();
 }
 
-public class Customer : ICustomFieldEntity
+public class Customer : ICustomFieldEntity<Customer>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = "";
