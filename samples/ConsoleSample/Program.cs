@@ -1,18 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Security.Principal;
 using System.Text.Json;
+using EFCoreCustomFields;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using EFCoreCustomFields;
+
+namespace ConsoleSample;
 
 // to recreate initial migration:  dotnet ef migrations add Initial --project Tests\ConsoleSample
 // to update database: dotnet ef database update --project Tests\ConsoleSample
-
 class Program
 {
-    static void Main(string[] args)
+    private static readonly JsonSerializerOptions _serializerOptions = new() { WriteIndented = true };
+
+    static void Main()
     {
         var services = new ServiceCollection();
 
@@ -45,7 +44,7 @@ class Program
                     IsRequired = true,
                     ForEntity = Product.EntityName
                 });
-           
+
                 context.CustomFields.Add(new CustomField
                 {
                     Name = "Size",
@@ -54,7 +53,7 @@ class Program
                     IsRequired = true,
                     ForEntity = Product.EntityName
                 });
-           
+
                 context.CustomFields.Add(new CustomField
                 {
                     Name = "Location",
@@ -102,19 +101,17 @@ class Program
             }
 
             context.SaveChanges();
-            
-            
+
             // read back the product and customer along with their custom fields
             // then output them to console as json
             var products = context.Products.Include(p => p.CustomFields).ToList();
             var customers = context.Customer.Include(c => c.CustomFields).ToList();
 
             Console.WriteLine("Products:");
-            Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions {WriteIndented = true}));
+            Console.WriteLine(JsonSerializer.Serialize(products, _serializerOptions));
 
             Console.WriteLine("\nCustomers:");
-            Console.WriteLine(JsonSerializer.Serialize(customers, new JsonSerializerOptions {WriteIndented = true}));
-
+            Console.WriteLine(JsonSerializer.Serialize(customers, _serializerOptions));
 
             Console.WriteLine("\nDone");
 
@@ -132,12 +129,11 @@ class Program
     }
 }
 
-
 public class Product : ICustomFieldEntity
 {
     public long Id { get; set; }
     public string Name { get; set; } = "";
-    public static string EntityName  => nameof(Product);
+    public static string EntityName => nameof(Product);
     public ICollection<CustomFieldValue<Product>> CustomFields { get; set; } = new List<CustomFieldValue<Product>>();
 }
 

@@ -75,7 +75,39 @@ Add a reference to the EFCoreCustomFields NuGet package to the project with your
 
 ### Database Requirements
 
+The sample project, and this documentation, is going to assume a relational database using SQL; specifically, SQL Server in our example.
 
+#### Tables
+
+Essentially, each entity to which you would like to add custom fields will have its own ENTITYCustomFields table.  For example, in the sample application, the Customer and Product entities have their own CustomerCustomFields and ProductCustomFields tables.
+
+![Database Tables with Custom Fields](./assets/images/database-tables.png "Database Tables with CustomFields")
+
+You will also have a CustomFields table.  This table will define the custom fields themselves and includes a column to reference the table/entity in which it is used.
+
+Let's look at the Products and ProductCustomFields tables to explain the relationship between an entity, the entity's custom fields table, and the custom fields table itself.
+
+Here's the Products table data:
+
+![Products Table](./assets/images/products-table.png "Products table")
+
+Here's the ProductCustomFields table data:
+
+![ProductCustomFields Table](./assets/images/productcustomfields-table.png "ProductCustomFields table")
+
+Here's the CustomFields table data:
+
+![CustomFields Table](./assets/images/customfields-table.png "CustomFields table")
+
+As you can see, the Products table schema is unchanged.  We are not modifying the existing table.  That said, we do need to modify the Product entity
+
+Each of the entities to which you would like to add custom fields will have a foreign key reference column to the Cus
+
+To work with this library, the EF Core entities to which you would like to add custom fields will need to implement the ICustomFieldEntity interface.
+
+
+
+You will also need a custom fields table.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
