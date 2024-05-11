@@ -16,74 +16,69 @@ public partial class CustomFieldValue<T> where T : class, ICustomFieldEntity
     public virtual bool? ValueBoolean { get; set; }
     public virtual DateTime? ValueDateTime { get; set; }
 
-    public CustomFieldValue()
+    public CustomFieldValue(CustomFieldType customFieldType, long customFieldId, object customFieldValue)
     {
-
+        SetCustomFieldValues(customFieldType, customFieldId, customFieldValue);
     }
 
-    public CustomFieldValue(CustomFieldType cfType, long cfId, object value)
+    private void SetCustomFieldValues(CustomFieldType customFieldType, long customFieldId, object customFieldValue)
     {
-        SetCustomFieldValues(cfType, cfId, value);
-    }
+        CustomFieldId = customFieldId;
 
-    private void SetCustomFieldValues(CustomFieldType cfType, long cfId, object value)
-    {
-        CustomFieldId = cfId;
-
-        switch (cfType)
+        switch (customFieldType)
         {
             case CustomFieldType.SingleLineText:
             case CustomFieldType.MultiLineText:
             case CustomFieldType.List:
-                ValueString = (string)value;
+                ValueString = (string)customFieldValue;
                 break;
 
             case CustomFieldType.Number:
-                ValueNumber = Convert.ToInt64(value, CultureInfo.CurrentCulture);
+                ValueNumber = Convert.ToInt64(customFieldValue, CultureInfo.CurrentCulture);
                 break;
 
             case CustomFieldType.Decimal:
             case CustomFieldType.Currency:
             case CustomFieldType.Percent:
-                ValueDecimal = Convert.ToDouble(value, CultureInfo.CurrentCulture);
+                ValueDecimal = Convert.ToDouble(customFieldValue, CultureInfo.CurrentCulture);
                 break;
 
             case CustomFieldType.CheckBox:
-                ValueBoolean = (bool)value;
+                ValueBoolean = (bool)customFieldValue;
                 break;
 
             case CustomFieldType.DateTime:
             case CustomFieldType.Date:
-                ValueDateTime = (DateTime)value;
+                ValueDateTime = (DateTime)customFieldValue;
                 break;
 
             case CustomFieldType.Phone:
-                if (!IsValidPhoneNumber((string)value))
+                if (!IsValidPhoneNumber((string)customFieldValue))
                 {
                     throw new ValidationException("Invalid phone number");
                 }
 
-                ValueString = (string)value;
+                ValueString = (string)customFieldValue;
 
                 break;
 
             case CustomFieldType.Email:
-                if (!IsValidEmail((string)value))
+                if (!IsValidEmail((string)customFieldValue))
                 {
                     throw new ValidationException("Invalid email");
                 }
 
-                ValueString = (string)value;
+                ValueString = (string)customFieldValue;
 
                 break;
 
             case CustomFieldType.Url:
-                if (!IsValidUrl((string)value))
+                if (!IsValidUrl((string)customFieldValue))
                 {
                     throw new ValidationException("Invalid url");
                 }
 
-                ValueString = (string)value;
+                ValueString = (string)customFieldValue;
 
                 break;
         }
@@ -110,6 +105,11 @@ public partial class CustomFieldValue<T> where T : class, ICustomFieldEntity
 
     private static bool IsValidPhoneNumber(string number)
     {
+        if (string.IsNullOrWhiteSpace(number))
+        {
+            return false;
+        }
+
         return PhoneNumberRegex().IsMatch(number);
     }
 
