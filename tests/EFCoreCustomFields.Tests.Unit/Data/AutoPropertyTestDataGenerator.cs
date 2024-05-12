@@ -67,8 +67,12 @@ public class AutoPropertyTestDataGenerator<T> : IEnumerable<object[]> where T : 
     private static bool CanCreateInstanceUsingDefaultConstructor(Type t) =>
         t.IsValueType || !t.IsAbstract && t.GetConstructor(Type.EmptyTypes) != null;
 
-    public class GenericClass : ICustomFieldEntity
+    public class GenericClass : ICustomFieldEntity<GenericClass>
     {
+        public static string EntityName => nameof(GenericClass);
+
         public int MyProperty { get; set; }
+
+        public ICollection<CustomFieldValue<GenericClass>> CustomFields { get; set; } = new List<CustomFieldValue<GenericClass>>();
     }
 }
